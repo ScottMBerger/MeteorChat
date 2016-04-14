@@ -13,11 +13,30 @@ export default class Task extends Component {
       <li>
         <span className="text">
           <strong>{this.props.task.username ? this.props.task.username : "Anon"}</strong>: {this.props.task.text}
-        </span></li>
+        </span>
+      </li>
+    );
+  }
+}
+export default class Hash extends Component {
+
+  render() {
+    return (
+      <a href="#">
+        <span className="ahash">
+          <strong>{this.props.word} </strong>
+        </span>
+      </a>
     );
   }
 }
  
+Hash.propTypes = {
+  // This component gets the task to display through a React prop.
+  // We can use propTypes to indicate it is required
+  word: PropTypes.string.isRequired,
+};
+
 Task.propTypes = {
   // This component gets the task to display through a React prop.
   // We can use propTypes to indicate it is required
@@ -25,6 +44,23 @@ Task.propTypes = {
 };
 
 export default class App extends React.Component {
+  renderHashes() {
+    var hashes = [];
+    function insertion(item, index) {
+      if (item.text.match(/#\w+/g)) {
+        item.text.match(/#\w+/g).forEach(function(spec) {
+          if (!hashes.includes(spec)) {
+            hashes.push(spec);
+          }
+        });
+      }
+    }
+    this.props.tasks.forEach(insertion);
+   
+    return hashes.map((word) =>(
+       <Hash word={word} />
+    ));
+  }
   renderTasks() {
     return this.props.tasks.map((task) => (
       <Task key={task._id} task={task} />
@@ -36,15 +72,10 @@ export default class App extends React.Component {
   }
   componentWillUpdate() {
     var node = ReactDOM.findDOMNode(this.refs.chat);
-    console.log(node.scrollTop);
-    console.log(node.scrollHeight);
     this.shouldScrollBottom = node.scrollHeight - node.scrollTop < 650;
   }
- 
-
   componentDidUpdate() {
     if (this.shouldScrollBottom) {
-
       var node = ReactDOM.findDOMNode(this.refs.chat);
       node.scrollTop = node.scrollHeight;
     }
@@ -68,7 +99,8 @@ export default class App extends React.Component {
   }
   
   render() {
-
+    console.log("okeplease");
+    console.log(this.renderHashes());
     return (
       <div className="container">
         <header>
@@ -83,6 +115,9 @@ export default class App extends React.Component {
         <form className="new-task" onSubmit={this.handleSubmit.bind(this)} >
             <input type="text" ref="textInput"/>
         </form>
+        <div classNames="hashtags">
+          {this.renderHashes()}
+        </div>
       </div>
     );
   }
